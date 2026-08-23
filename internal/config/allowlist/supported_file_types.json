@@ -94,5 +94,9 @@
   ".libsonnet",
   ".zig",
   ".thrift",
-  ".capnp"
+  ".capnp",
+  ".v",
+  ".sv",
+  ".vhd",
+  ".vhdl"
 ]
