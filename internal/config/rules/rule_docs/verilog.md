@@ -3,9 +3,12 @@
 
 #### Blocking and Non-Blocking Assignments
 - Non-blocking assignments (`<=`) used for combinational logic, or blocking assignments (`=`) used for sequential logic inside a clocked `always`/`always_ff` block, where the mixed style changes simulated ordering or infers unintended hardware
-- Blocking and non-blocking assignments to the same signal within one `always` block, producing order-dependent, non-deterministic behavior
-- A signal assigned from more than one `always` block, creating multiple drivers on synthesis and a race in simulation
-- Prefer `always_ff`, `always_comb`, and `always_latch` (SystemVerilog) so the tool checks the intended inference instead of a bare `always @(*)`
+- Mixed blocking and non-blocking assignments to the same variable when later statements observe a value different from the intended value because non-blocking updates are deferred
+- Do not claim that statement ordering within one procedural block is inherently nondeterministic
+- A register or variable intended to have a single procedural driver being written by multiple processes, particularly violations of `always_ff`, `always_comb`, or `always_latch` single-writer rules
+- Do not flag intentional multiple drivers on an appropriate net type unless an actual conflict is demonstrated
+- Misuse of `always_ff`, `always_comb`, or `always_latch` that violates their event-control, assignment, or single-writer semantics
+- Do not report a correctly formed `always @(*)` solely as a style issue
 
 #### Inferred Latches
 - A combinational `always`/`always_comb` block where a signal is not assigned on every path (missing `else`, an incomplete `case`, or a `case` without `default`), inferring an unintended transparent latch
@@ -30,7 +33,7 @@
 - Combinational feedback loops, or read-during-write races on inferred memory without a defined collision policy
 
 #### Simulation vs. Synthesis and Unsafe Constructs
-- `initial` blocks, `#delay` timing, `fork`/`join`, or `force`/`release` used in code intended for synthesis, where the tool ignores them and simulation disagrees with hardware
+- Simulation-oriented constructs such as `#delay`, `fork`/`join`, `force`/`release`, or an `initial` block whose behavior is required by the design but is unsupported by the declared target synthesis flow. Do not flag initialization solely by syntax when the target FPGA or synthesis tool documents support for it
 - Incomplete or overlapping sensitivity lists in a bare `always @(...)` that make simulation differ from the synthesized combinational function; prefer `@(*)` or `always_comb`
 - `casex`/`casez` whose don't-care matching hides priority bugs, or a `case` relying on `x`/`z` matching; prefer `case` with `unique`/`priority` where the intent is exclusive or prioritized
 - `$display`/`$finish`/assertions guarding real behavior, and non-synthesizable system tasks left in the design path
