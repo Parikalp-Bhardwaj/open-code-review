@@ -43,6 +43,7 @@
     "**/*.thrift": "thrift.md",
     "**/*.capnp": "capnp.md",
     "**/*.{v,sv}": "verilog.md",
-    "**/*.{vhd,vhdl}": "vhdl.md"
+    "**/*.{vhd,vhdl}": "vhdl.md",
+    "**/*.m": "matlab.md"
   }
 }
