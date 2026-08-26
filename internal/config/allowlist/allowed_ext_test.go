@@ -90,6 +90,8 @@ func TestIsAllowedExt(t *testing.T) {
 		{".V", true},
 		{".sv", true},
 		{".SV", true},
+		{".vh", true},
+		{".VH", true},
 		{".vhd", true},
 		{".VHD", true},
 		{".vhdl", true},
@@ -300,7 +302,7 @@ func TestIsExcludedPath(t *testing.T) {
 		{"vhdl non-testbench source", "rtl/fifo.vhd", false},
 		{"vhdl non-testbench source vhdl ext", "rtl/fifo.vhdl", false},
 		{"hdl tb without underscore not excluded", "rtl/tbench.v", false},
-		{"hdl tb substring mid-name not excluded", "rtl/subtract.v", false},
+		{"hdl tb substring mid-name not excluded", "rtl/outbound.v", false},
 
 		// Case insensitive
 		{"case insensitive go", "Foo/Bar_Test.go", true},

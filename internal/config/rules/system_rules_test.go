@@ -137,6 +137,7 @@ func TestResolve_DefaultRules(t *testing.T) {
 		{"src/rpc.capnp", "Ordinals and Wire Compatibility"},
 		{"rtl/counter.v", "Blocking and Non-Blocking Assignments"},
 		{"rtl/alu.sv", "Blocking and Non-Blocking Assignments"},
+		{"rtl/defines.vh", "Blocking and Non-Blocking Assignments"},
 		{"rtl/fifo.vhd", "numeric_std"},
 		{"rtl/fifo.vhdl", "numeric_std"},
 		{"Models/main.m", "Indexing, Shapes, and Implicit Expansion"},

@@ -42,7 +42,7 @@
     "**/*.zig": "zig.md",
     "**/*.thrift": "thrift.md",
     "**/*.capnp": "capnp.md",
-    "**/*.{v,sv}": "verilog.md",
+    "**/*.{v,sv,vh}": "verilog.md",
     "**/*.{vhd,vhdl}": "vhdl.md",
     "**/*.m": "matlab.md"
   }
