@@ -187,6 +187,8 @@ OCR использует [`bmatcuk/doublestar/v4`](https://pkg.go.dev/github.com
 | `**/*.{v,sv,vh}` | `verilog.md` — RTL на Verilog и SystemVerilog. |
 | `**/*.{vhd,vhdl}` | `vhdl.md` — RTL на VHDL. |
 | `**/*.m` | `matlab.md` (или `objc.md` через [определение содержимого](#content-sniffing-for-m-files)) |
+| `**/*.sol` | `solidity.md` — смарт-контракты Solidity. |
+| `**/*.vy` | `vyper.md` — смарт-контракты Vyper. |
 | *(fallback)* | `default.md` |
 
 Разрешённое тело правила становится значением плейсхолдера `{{system_rule}}`

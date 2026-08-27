@@ -185,6 +185,8 @@ matching order:
 | `**/*.{v,sv,vh}` | `verilog.md` — Verilog and SystemVerilog RTL. |
 | `**/*.{vhd,vhdl}` | `vhdl.md` — VHDL RTL. |
 | `**/*.m` | `matlab.md` (or `objc.md` via [content sniffing](#content-sniffing-for-m-files)) |
+| `**/*.sol` | `solidity.md` — Solidity smart contracts. |
+| `**/*.vy` | `vyper.md` — Vyper smart contracts. |
 | *(fallback)* | `default.md` |
 
 The resolved rule body becomes the `{{system_rule}}` placeholder in the

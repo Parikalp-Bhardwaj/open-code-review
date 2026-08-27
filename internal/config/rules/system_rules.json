@@ -44,6 +44,8 @@
     "**/*.capnp": "capnp.md",
     "**/*.{v,sv,vh}": "verilog.md",
     "**/*.{vhd,vhdl}": "vhdl.md",
-    "**/*.m": "matlab.md"
+    "**/*.m": "matlab.md",
+    "**/*.sol": "solidity.md",
+    "**/*.vy": "vyper.md"
   }
 }

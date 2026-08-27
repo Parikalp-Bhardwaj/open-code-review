@@ -99,5 +99,7 @@
   ".sv",
   ".vh",
   ".vhd",
-  ".vhdl"
+  ".vhdl",
+  ".sol",
+  ".vy"
 ]
