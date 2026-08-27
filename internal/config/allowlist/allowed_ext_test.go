@@ -310,7 +310,7 @@ func TestIsExcludedPath(t *testing.T) {
 		{"gen not suffix", "src/gen/util.go", false},
 		{"pb not suffix", "src/pb/client.go", false},
 
-		// Hardware Description Language testbenches (Verilog/SystemVerilog/VHDL; .vh headers supported).
+		// Hardware Description Language testbenches (Verilog/SystemVerilog/VH/VHDL).
 		// Conventional testbench naming: tb_<name> prefix or <name>_tb suffix.
 		{"verilog tb_ prefix", "rtl/tb_counter.v", true},
 		{"systemverilog tb_ prefix", "rtl/tb_alu.sv", true},
