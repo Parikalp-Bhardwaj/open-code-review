@@ -169,6 +169,7 @@ OCR 用 [`bmatcuk/doublestar/v4`](https://pkg.go.dev/github.com/bmatcuk/doublest
 | `**/*.{v,sv,vh}` | `verilog.md`——Verilog 与 SystemVerilog RTL。 |
 | `**/*.{vhd,vhdl}` | `vhdl.md`——VHDL RTL。 |
 | `**/*.m` | `matlab.md`（或通过[内容嗅探](#针对-m-文件的内容嗅探)使用 `objc.md`） |
+| `**/*.mm` | `objc.md`——Objective-C++ 源代码。 |
 | `**/*.sol` | `solidity.md`——Solidity 智能合约。 |
 | `**/*.vy` | `vyper.md`——Vyper 智能合约。 |
 | *(fallback)* | `default.md` |

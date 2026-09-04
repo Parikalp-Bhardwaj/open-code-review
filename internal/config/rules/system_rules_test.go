@@ -152,6 +152,8 @@ func TestResolve_DefaultRules(t *testing.T) {
 		{"rtl/fifo.vhd", "numeric_std"},
 		{"rtl/fifo.vhdl", "numeric_std"},
 		{"Models/main.m", "Indexing, Shapes, and Implicit Expansion"},
+		{"ios/ViewController.mm", "ARC and Object Ownership"},
+		{"ios/ViewController.MM", "ARC and Object Ownership"},
 		{"src/Counter.sol", "Checks-Effects-Interactions"},
 		{"contracts/Vault.sol", "Delegatecall and Proxy Upgradeability"},
 		{"contracts/token.vy", "Language Restrictions"},
@@ -179,9 +181,6 @@ func TestResolve_FallbackToDefault(t *testing.T) {
 		"readme.md",
 		"docs/architecture.txt",
 		"Makefile",
-		// Note: .m now matches matlab.md, so it's no longer a "no rule
-		// matches" example; .mm remains one.
-		"ios/ViewController.mm",
 	}
 
 	for _, path := range paths {

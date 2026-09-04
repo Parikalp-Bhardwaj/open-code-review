@@ -47,6 +47,7 @@
     "**/*.{v,sv,vh}": "verilog.md",
     "**/*.{vhd,vhdl}": "vhdl.md",
     "**/*.m": "matlab.md",
+    "**/*.mm": "objc.md",
     "**/*.sol": "solidity.md",
     "**/*.vy": "vyper.md"
   }

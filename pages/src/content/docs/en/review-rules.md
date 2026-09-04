@@ -186,6 +186,7 @@ matching order:
 | `**/*.{v,sv,vh}` | `verilog.md` — Verilog and SystemVerilog RTL. |
 | `**/*.{vhd,vhdl}` | `vhdl.md` — VHDL RTL. |
 | `**/*.m` | `matlab.md` (or `objc.md` via [content sniffing](#content-sniffing-for-m-files)) |
+| `**/*.mm` | `objc.md` — Objective-C++ source. |
 | `**/*.sol` | `solidity.md` — Solidity smart contracts. |
 | `**/*.vy` | `vyper.md` — Vyper smart contracts. |
 | *(fallback)* | `default.md` |
