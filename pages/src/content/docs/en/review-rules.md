@@ -149,7 +149,7 @@ matching order:
 | `**/*.properties` | `properties.md` — i18n / configuration files. |
 | `**/*{mapper,dao}*.xml` | `mapper_dao_xml.md` — MyBatis-style mapper SQL. |
 | `**/pom.xml` | `pom_xml.md` — Maven dependencies. |
-| `**/build.gradle` | `build_gradle.md` — Gradle dependencies. |
+| `**/*.gradle` | `build_gradle.md` — Gradle dependencies. |
 | `**/package.json` | `package_json.md` — NPM dependencies / scripts. |
 | `**/Cargo.toml` | `cargo_toml.md` — Rust manifest. |
 | `**/composer.json` | `composer_json.md` — Composer dependencies, autoloading, scripts, plugins, and package configuration. |

@@ -82,6 +82,10 @@ func TestResolve_DefaultRules(t *testing.T) {
 		{"src/main/resources/dao/userdao.xml", "SQL Logic Error Detection"},
 		{"pom.xml", "snapshot"},
 		{"submodule/pom.xml", "snapshot"},
+		{"build.gradle", "snapshot version dependencies"},
+		{"settings.gradle", "snapshot version dependencies"},
+		{"scripts/dependencies.gradle", "snapshot version dependencies"},
+		{"SETTINGS.GRADLE", "snapshot version dependencies"},
 		{"src/main/resources/application.properties", "Configuration Error Detection"},
 		{"frontend/package.json", "latest"},
 		{"composer.json", "Composer Manifest Review Principles"},
@@ -182,6 +186,7 @@ func TestResolve_FallbackToDefault(t *testing.T) {
 		"readme.md",
 		"docs/architecture.txt",
 		"Makefile",
+		"gradlew",
 	}
 
 	for _, path := range paths {
