@@ -124,6 +124,58 @@ func TestPreviewShowsProviderExcludedVendorDiff(t *testing.T) {
 	}
 }
 
+// TestPreviewKeepsProviderEntriesInChangesetOrder pins #1236: provider entries
+// keep their changeset position instead of being listed first.
+func TestPreviewKeepsProviderEntriesInChangesetOrder(t *testing.T) {
+	dir := initPreviewRepo(t)
+
+	write := func(rel, content string) {
+		t.Helper()
+		path := filepath.Join(dir, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatalf("create directory for %s: %v", rel, err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatalf("write %s: %v", rel, err)
+		}
+	}
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v: %s", args, err, out)
+		}
+	}
+	write("a.go", "package a\n")
+	write("vendor/pkg/generated.go", "package pkg\n")
+	run("add", "a.go", "vendor/pkg/generated.go")
+	run("commit", "-m", "add tracked files")
+
+	// Tracked changes come first in Git order, followed by untracked b.go.
+	write("a.go", "package a\n\nconst A = 1\n")
+	write("vendor/pkg/generated.go", "package pkg\n\nconst V = 1\n")
+	write("b.go", "package b\n")
+
+	preview, err := Preview(context.Background(), Args{RepoDir: dir})
+	if err != nil {
+		t.Fatalf("Preview error: %v", err)
+	}
+	var paths []string
+	for _, e := range preview.Entries {
+		paths = append(paths, e.Path)
+	}
+	if want := []string{"a.go", "vendor/pkg/generated.go", "b.go"}; !slices.Equal(paths, want) {
+		t.Fatalf("entry order = %v, want %v", paths, want)
+	}
+	if e := preview.Entries[1]; e.WillReview || e.ExcludeReason != ExcludeProviderDirectory {
+		t.Errorf("vendor entry = %+v, want excluded as provider_directory", e)
+	}
+	if preview.TotalFiles != 3 || preview.ReviewableCount != 2 || preview.ExcludedCount != 1 {
+		t.Errorf("counts = total:%d reviewable:%d excluded:%d, want 3/2/1",
+			preview.TotalFiles, preview.ReviewableCount, preview.ExcludedCount)
+	}
+}
+
 // TestPreviewMarksOversizedDiffTooLarge pins that preview applies the per-file
 // diff-size ceiling the real run applies before dispatch, and reports it under
 // its own reason rather than silently listing the file as reviewable.

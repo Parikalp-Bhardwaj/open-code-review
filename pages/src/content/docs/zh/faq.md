@@ -90,9 +90,12 @@ curl http://127.0.0.1:11434/v1/chat/completions -H "Content-Type: application/js
 ```
 src/foo.go              modified
 src/foo_test.go         modified  (excluded: user_exclude)
-node_modules/lib.js     added     (excluded: provider_directory)
 imgs/logo.png           binary    (excluded: unsupported_ext)
+2 file(s) in provider directories (node_modules/) — not reviewable
 ```
+
+provider 目录中的文件在文本输出中汇总为一行；`--format json` 仍会逐个列出，
+原因为 `provider_directory`。
 
 这些排除原因对应[文件过滤](../review-rules/#how-files-are-filtered)中的门：
 

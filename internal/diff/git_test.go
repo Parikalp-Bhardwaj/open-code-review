@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/alibaba/open-code-review/internal/gitcmd"
+	"github.com/alibaba/open-code-review/internal/model"
 )
 
 // runGitTest runs a git command in dir and fails the test on error.
@@ -103,6 +104,34 @@ func TestGetDiffSetRetainsBuiltInDirectoryExclusionsForReporting(t *testing.T) {
 	}
 	if len(diffs) != 0 {
 		t.Fatalf("GetDiff = %+v, want no reviewable vendor diff", diffs)
+	}
+}
+
+func TestPartitionDiffsRecordsProviderExclusionPositions(t *testing.T) {
+	provider := NewWorkspaceProvider(t.TempDir(), gitcmd.New(0))
+	set := provider.partitionDiffs([]model.Diff{
+		{OldPath: "vendor/a.go", NewPath: "vendor/a.go"},
+		{OldPath: "a.go", NewPath: "a.go"},
+		{OldPath: "target/b.rs", NewPath: "target/b.rs"},
+		{OldPath: "node_modules/c.js", NewPath: "/dev/null"},
+		{OldPath: "b.go", NewPath: "b.go"},
+	})
+
+	var included, excluded []string
+	for _, d := range set.Included {
+		included = append(included, d.NewPath)
+	}
+	for _, d := range set.Excluded {
+		excluded = append(excluded, d.OldPath)
+	}
+	if got := strings.Join(included, ","); got != "a.go,b.go" {
+		t.Errorf("included = %s, want a.go,b.go", got)
+	}
+	if got := strings.Join(excluded, ","); got != "vendor/a.go,target/b.rs,node_modules/c.js" {
+		t.Errorf("excluded = %s, want vendor/a.go,target/b.rs,node_modules/c.js", got)
+	}
+	if got := fmt.Sprint(set.ExcludedAt); got != "[0 1 1]" {
+		t.Errorf("excludedAt = %s, want [0 1 1]", got)
 	}
 }
 

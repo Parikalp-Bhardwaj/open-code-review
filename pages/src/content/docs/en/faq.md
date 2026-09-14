@@ -99,9 +99,12 @@ candidate file with the **reason** it was kept or dropped:
 ```
 src/foo.go              modified
 src/foo_test.go         modified  (excluded: user_exclude)
-node_modules/lib.js     added     (excluded: provider_directory)
 imgs/logo.png           binary    (excluded: unsupported_ext)
+2 file(s) in provider directories (node_modules/) — not reviewable
 ```
+
+Files in provider directories are summarized on one line; `--format json`
+still lists each one with the `provider_directory` reason.
 
 The exclusion reasons map to gates in the
 [file filter](../review-rules/#how-files-are-filtered):

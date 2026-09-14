@@ -67,8 +67,9 @@ type Provider struct {
 // provider's built-in directory rules. The latter remain unavailable to a
 // review, but callers such as Preview can account for them.
 type DiffSet struct {
-	Included []model.Diff
-	Excluded []model.Diff
+	Included   []model.Diff
+	Excluded   []model.Diff
+	ExcludedAt []int
 }
 
 // NewProvider creates a Provider for range mode: from..to (via merge-base).
@@ -426,6 +427,7 @@ func (p *Provider) partitionDiffs(diffs []model.Diff) DiffSet {
 		}
 		if isProviderDirExcluded(path) {
 			result.Excluded = append(result.Excluded, d)
+			result.ExcludedAt = append(result.ExcludedAt, len(result.Included))
 		} else if !p.isPathExcluded(path, patterns) {
 			result.Included = append(result.Included, d)
 		}

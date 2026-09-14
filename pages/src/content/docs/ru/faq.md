@@ -105,9 +105,13 @@ curl http://127.0.0.1:11434/v1/chat/completions -H "Content-Type: application/js
 ```
 src/foo.go              modified
 src/foo_test.go         modified  (excluded: user_exclude)
-node_modules/lib.js     added     (excluded: provider_directory)
 imgs/logo.png           binary    (excluded: unsupported_ext)
+2 file(s) in provider directories (node_modules/) — not reviewable
 ```
+
+Файлы в каталогах provider сводятся в текстовом выводе к одной строке;
+`--format json` по-прежнему перечисляет каждый из них с причиной
+`provider_directory`.
 
 Причины исключения соответствуют этапам
 [фильтрации файлов](../review-rules/#how-files-are-filtered):

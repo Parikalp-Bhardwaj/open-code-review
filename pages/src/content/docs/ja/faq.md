@@ -96,9 +96,12 @@ LLM タイムアウトを引き上げてください——[タイムアウト](.
 ```
 src/foo.go              modified
 src/foo_test.go         modified  (excluded: user_exclude)
-node_modules/lib.js     added     (excluded: provider_directory)
 imgs/logo.png           binary    (excluded: unsupported_ext)
+2 file(s) in provider directories (node_modules/) — not reviewable
 ```
+
+provider ディレクトリ内のファイルはテキスト出力では 1 行にまとめられます。`--format json`
+では引き続き各ファイルが `provider_directory` の理由付きで一覧されます。
 
 これらの除外理由は、[ファイルフィルタリング](../review-rules/#how-files-are-filtered)のゲートに対応します。
 

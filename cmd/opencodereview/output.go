@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"time"
 	"unicode"
 
 	"github.com/alibaba/open-code-review/internal/agent"
+	"github.com/alibaba/open-code-review/internal/diff"
 	"github.com/alibaba/open-code-review/internal/llm"
 	"github.com/alibaba/open-code-review/internal/llmloop"
 	"github.com/alibaba/open-code-review/internal/model"
@@ -739,16 +741,27 @@ func outputPreviewText(p *agent.DiffPreview, out io.Writer) {
 		return
 	}
 
-	maxPathLen := 0
+	// Provider exclusions stay in JSON but collapse into one terminal summary.
+	knownDirs := diff.ExcludedDirs()
+	reviewWidth, excludedWidth := 20, 20
+	providerCount := 0
+	var providerDirs []string
 	for _, e := range p.Entries {
-		if n := len(sanitizeTerminal(e.Path)); n > maxPathLen {
-			maxPathLen = n
+		switch {
+		case e.WillReview:
+			reviewWidth = max(reviewWidth, len(sanitizeTerminal(e.Path)))
+		case e.ExcludeReason == agent.ExcludeProviderDirectory:
+			providerCount++
+			for _, dir := range knownDirs {
+				matched := e.Path == strings.TrimSuffix(dir, "/") || strings.HasPrefix(e.Path, dir)
+				if matched && !slices.Contains(providerDirs, dir) {
+					providerDirs = append(providerDirs, dir)
+				}
+			}
+		default:
+			excludedWidth = max(excludedWidth, len(sanitizeTerminal(e.Path)))
 		}
 	}
-	if maxPathLen < 20 {
-		maxPathLen = 20
-	}
-	pathFmt := fmt.Sprintf("%%-%ds", maxPathLen)
 
 	fmt.Fprintf(out, "\nPreview: %d file(s) changed  |  %s  %s\n", p.TotalFiles,
 		colorf("\033[32m", "+%d", p.TotalInsertions),
@@ -762,8 +775,8 @@ func outputPreviewText(p *agent.DiffPreview, out io.Writer) {
 			}
 			// The counts are padded before colorizing so the columns stay aligned
 			// whether or not the escape sequences are present.
-			fmt.Fprintf(out, "  %s  "+pathFmt+" %s %s\n",
-				statusBadge(e.Status), sanitizeTerminal(e.Path),
+			fmt.Fprintf(out, "  %s  %-*s %s %s\n",
+				statusBadge(e.Status), reviewWidth, sanitizeTerminal(e.Path),
 				colorf("\033[32m", "+%-4d", e.Insertions),
 				colorf("\033[31m", "-%-4d", e.Deletions))
 		}
@@ -772,12 +785,19 @@ func outputPreviewText(p *agent.DiffPreview, out io.Writer) {
 	if p.ExcludedCount > 0 {
 		fmt.Fprintf(out, "\n%s\n", colorf("\033[1m", "Excluded from review (%d):", p.ExcludedCount))
 		for _, e := range p.Entries {
-			if e.WillReview {
+			if e.WillReview || e.ExcludeReason == agent.ExcludeProviderDirectory {
 				continue
 			}
-			fmt.Fprintf(out, "  %s  "+pathFmt+" %s\n",
-				statusBadge(e.Status), sanitizeTerminal(e.Path),
+			fmt.Fprintf(out, "  %s  %-*s %s\n",
+				statusBadge(e.Status), excludedWidth, sanitizeTerminal(e.Path),
 				colorf("\033[2m", "(%s)", sanitizeTerminal(string(e.ExcludeReason))))
+		}
+		if providerCount > 0 {
+			summary := fmt.Sprintf("%d file(s) in provider directories", providerCount)
+			if len(providerDirs) > 0 {
+				summary += " (" + strings.Join(providerDirs, ", ") + ")"
+			}
+			fmt.Fprintf(out, "  %s %s\n", sanitizeTerminal(summary), colorize("\033[2m", "— not reviewable"))
 		}
 	}
 

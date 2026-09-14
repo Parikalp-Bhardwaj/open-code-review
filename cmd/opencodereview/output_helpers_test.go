@@ -671,6 +671,124 @@ func TestOutputPreviewText_WithExcludedFiles(t *testing.T) {
 	}
 }
 
+// providerPreviewFixture interleaves provider exclusions with other entries.
+func providerPreviewFixture() *agent.DiffPreview {
+	return &agent.DiffPreview{
+		Entries: []agent.DiffPreviewEntry{
+			{Path: "src/main.go", Status: "modified", Insertions: 3, Deletions: 1, WillReview: true},
+			{Path: "target/cache/build.rs", Status: "added", Insertions: 40, ExcludeReason: model.ExcludeProviderDirectory},
+			{Path: "src/main_test.go", Status: "modified", Insertions: 2, ExcludeReason: model.ExcludeDefaultPath},
+			{Path: "vendor/pkg/a.go", Status: "modified", Insertions: 5, Deletions: 5, ExcludeReason: model.ExcludeProviderDirectory},
+			{Path: "assets/logo.png", Status: "binary", ExcludeReason: model.ExcludeBinary},
+			{Path: "vendor/pkg/b.go", Status: "added", Insertions: 7, ExcludeReason: model.ExcludeProviderDirectory},
+		},
+		TotalInsertions: 57,
+		TotalDeletions:  6,
+		TotalFiles:      6,
+		ReviewableCount: 1,
+		ExcludedCount:   5,
+	}
+}
+
+func TestOutputPreviewText_AggregatesProviderDirectories(t *testing.T) {
+	setColor(t, false)
+	got := captureStdout(t, func() { outputPreviewText(providerPreviewFixture(), os.Stdout) })
+
+	for _, want := range []string{
+		"Excluded from review (5):",
+		"src/main_test.go", "(default_path)",
+		"assets/logo.png", "(binary)",
+		"3 file(s) in provider directories (target/, vendor/) — not reviewable",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("preview missing %q:\n%s", want, got)
+		}
+	}
+	for _, unwanted := range []string{
+		"target/cache/build.rs", "vendor/pkg/a.go", "vendor/pkg/b.go",
+		"(provider_directory)", "node_modules/",
+	} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("preview should not contain %q:\n%s", unwanted, got)
+		}
+	}
+	if n := strings.Count(got, "provider directories"); n != 1 {
+		t.Errorf("provider summary printed %d times, want 1:\n%s", n, got)
+	}
+}
+
+func TestOutputPreviewText_ProviderSummaryColor(t *testing.T) {
+	setColor(t, true)
+	got := captureStdout(t, func() { outputPreviewText(providerPreviewFixture(), os.Stdout) })
+	if !strings.Contains(got, "3 file(s) in provider directories (target/, vendor/) \033[2m— not reviewable") {
+		t.Errorf("expected dimmed provider summary:\n%q", got)
+	}
+}
+
+// TestOutputPreviewText_LongExcludedPathsDoNotWidenOtherRows pins #1236: a
+// long path only pads the section that actually renders it.
+func TestOutputPreviewText_LongExcludedPathsDoNotWidenOtherRows(t *testing.T) {
+	setColor(t, false)
+	base := []agent.DiffPreviewEntry{
+		{Path: "a.go", Status: "added", Insertions: 1, Deletions: 2, WillReview: true},
+		{Path: "b_test.go", Status: "modified", ExcludeReason: model.ExcludeDefaultPath},
+	}
+	long := strings.Repeat("deeply/nested/", 10) + "generated.go"
+
+	rows := func(extra ...agent.DiffPreviewEntry) map[string]string {
+		entries := append(append([]agent.DiffPreviewEntry{}, base...), extra...)
+		p := &agent.DiffPreview{
+			Entries:         entries,
+			TotalFiles:      len(entries),
+			ReviewableCount: 1,
+			ExcludedCount:   len(entries) - 1,
+		}
+		out := captureStdout(t, func() { outputPreviewText(p, os.Stdout) })
+		found := map[string]string{}
+		for _, ln := range strings.Split(out, "\n") {
+			for _, path := range []string{"a.go", "b_test.go"} {
+				if strings.Contains(ln, "]  "+path+" ") {
+					found[path] = ln
+				}
+			}
+		}
+		return found
+	}
+
+	want := rows()
+	if want["a.go"] == "" || want["b_test.go"] == "" {
+		t.Fatalf("baseline rows not found: %v", want)
+	}
+	provider := rows(agent.DiffPreviewEntry{Path: "vendor/" + long, Status: "added", ExcludeReason: model.ExcludeProviderDirectory})
+	for _, path := range []string{"a.go", "b_test.go"} {
+		if provider[path] != want[path] {
+			t.Errorf("provider path changed %s row:\n got %q\nwant %q", path, provider[path], want[path])
+		}
+	}
+	excluded := rows(agent.DiffPreviewEntry{Path: long, Status: "added", ExcludeReason: model.ExcludeDefaultPath})
+	if excluded["a.go"] != want["a.go"] {
+		t.Errorf("long excluded path widened Will review row:\n got %q\nwant %q", excluded["a.go"], want["a.go"])
+	}
+}
+
+// TestOutputPreviewJSON_KeepsEveryProviderEntry pins that aggregation is text-only.
+func TestOutputPreviewJSON_KeepsEveryProviderEntry(t *testing.T) {
+	p := providerPreviewFixture()
+	var buf bytes.Buffer
+	if err := outputPreview(p, "json", &buf); err != nil {
+		t.Fatalf("outputPreview json: %v", err)
+	}
+	got := decodeSinglePreviewJSON(t, buf.String())
+	if len(got.Entries) != len(p.Entries) {
+		t.Fatalf("entries = %d, want %d", len(got.Entries), len(p.Entries))
+	}
+	for i := range p.Entries {
+		if got.Entries[i] != p.Entries[i] {
+			t.Errorf("entry %d = %+v, want %+v", i, got.Entries[i], p.Entries[i])
+		}
+	}
+}
+
 // decodeSinglePreviewJSON asserts that s is exactly one JSON value followed
 // only by the encoder's trailing newline. Automation consuming --format json
 // relies on this: a stray banner or progress line on stdout would break it.

@@ -98,9 +98,12 @@ curl http://127.0.0.1:11434/v1/chat/completions -H "Content-Type: application/js
 ```
 src/foo.go              modified
 src/foo_test.go         modified  (excluded: user_exclude)
-node_modules/lib.js     added     (excluded: provider_directory)
 imgs/logo.png           binary    (excluded: unsupported_ext)
+2 file(s) in provider directories (node_modules/) — not reviewable
 ```
+
+provider 디렉터리의 파일은 텍스트 출력에서 한 줄로 요약됩니다. `--format json`에서는
+여전히 파일마다 `provider_directory` 사유와 함께 나옵니다.
 
 제외 사유는
 [파일 필터](../review-rules/#how-files-are-filtered)의 관문과 짝을 이룹니다.
